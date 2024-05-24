@@ -1,10 +1,5 @@
-/**
- * All files uploaded to Uploadthing are associated with a FileRoute.
- * To learn more about it, check out the documentation: [Uploadthing Getting Started for N](https://docs.uploadthing.com/getting-started/appdir).
- */
-
-import { auth } from "@clerk/nextjs/server";
 import { createUploadthing, type FileRouter } from "uploadthing/next";
+import { auth } from "@clerk/nextjs/server";
 
 const f = createUploadthing();
 
@@ -22,15 +17,12 @@ export const ourFileRouter = {
   subaccountLogo: f({ image: { maxFileSize: "4MB", maxFileCount: 1 } })
     .middleware(authenticateUser)
     .onUploadComplete(() => {}),
-
   avatar: f({ image: { maxFileSize: "4MB", maxFileCount: 1 } })
     .middleware(authenticateUser)
     .onUploadComplete(() => {}),
-
   agencyLogo: f({ image: { maxFileSize: "4MB", maxFileCount: 1 } })
     .middleware(authenticateUser)
     .onUploadComplete(() => {}),
-
   media: f({ image: { maxFileSize: "4MB", maxFileCount: 1 } })
     .middleware(authenticateUser)
     .onUploadComplete(() => {}),

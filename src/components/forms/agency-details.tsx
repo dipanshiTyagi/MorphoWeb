@@ -96,12 +96,14 @@ const AgencyDetails = ({ data }: Props) => {
     if (data) {
       form.reset(data);
     }
+
+    console.log("FORM DATA: ", data);
   }, [data]);
 
   const handleSubmit = async (values: z.infer<typeof FormSchema>) => {
     let newUserData;
-    let custId;
     try {
+      // Ensure the user creation process is complete before creating/upserting the agency
       if (!data?.id) {
         const bodyData = {
           email: values.companyEmail,
@@ -112,7 +114,7 @@ const AgencyDetails = ({ data }: Props) => {
               country: values.country,
               line1: values.address,
               postal_code: values.zipCode,
-              state: values.zipCode,
+              state: values.state,
             },
             name: values.name,
           },
@@ -124,54 +126,58 @@ const AgencyDetails = ({ data }: Props) => {
             state: values.zipCode,
           },
         };
-      }
-      // WIP: custId
-      newUserData = await initUser({ role: AGENCY_OWNER });
 
-      if (!data?.id) {
-        const response = await upsertAgency({
-          id: data?.id ? data.id : v4(),
-          address: values.address,
-          agencyLogo: values.agencyLogo,
-          city: values.city,
-          companyPhone: values.companyPhone,
-          country: values.country,
-          name: values.name,
-          state: values.state,
-          whiteLabel: values.whiteLabel,
-          zipCode: values.zipCode,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          companyEmail: values.companyEmail,
-          connectAccountId: "",
-          goal: 5,
-        });
-        toast({
-          title: "Created Agency",
-        });
-        // if (data?.id) return router.refresh();
-        // if (response) {
-        //   return router.refresh();
-        // }
-        return router.refresh();
+        // Create the user and get user data
+        newUserData = await initUser({ role: AGENCY_OWNER });
+
+        if (!newUserData || !newUserData.id) {
+          throw new Error("User creation failed");
+        }
       }
+
+      console.log(data);
+
+      // Upsert the agency with the new user ID if user was created, otherwise use existing data
+      await upsertAgency({
+        id: data?.id ? data.id : v4(),
+        address: values.address,
+        agencyLogo: values.agencyLogo,
+        city: values.city,
+        companyPhone: values.companyPhone,
+        country: values.country,
+        name: values.name,
+        state: values.state,
+        whiteLabel: values.whiteLabel,
+        zipCode: values.zipCode,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        companyEmail: values.companyEmail,
+        connectAccountId: "",
+        goal: 5,
+      });
+
+      toast({
+        title: "Created Agency",
+      });
+
+      return router.refresh();
     } catch (error) {
       console.error(error);
       toast({
         variant: "destructive",
         title: "Oppse!",
-        description: "could not delete your agency ",
+        description: "Could not create or update your agency",
       });
     }
   };
 
   const handleDeleteAgency = async () => {
     if (!data?.id) return;
-    setDeletingAgency(true);
 
     // WIP: Discontinue the Subscription
 
     try {
+      setDeletingAgency(true);
       const response = await deleteAgency(data?.id);
 
       toast({

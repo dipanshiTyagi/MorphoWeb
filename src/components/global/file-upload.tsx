@@ -1,4 +1,3 @@
-"use client";
 import { FileIcon, X } from "lucide-react";
 import Image from "next/image";
 import React from "react";
@@ -52,7 +51,6 @@ const FileUpload = ({ apiEndpoint, onChange, value }: Props) => {
         endpoint={apiEndpoint}
         onClientUploadComplete={(res) => {
           onChange(res?.[0].url);
-          console.log("Files: ", res);
         }}
         onUploadError={(error: Error) => {
           console.log(error);

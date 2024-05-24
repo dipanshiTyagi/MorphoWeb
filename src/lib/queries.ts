@@ -149,9 +149,7 @@ export const createTeamUser = async (agencyId: string, user: User) => {
 
 export const verifyAndAcceptInvitation = async () => {
   const user = await currentUser();
-
-  if (!user) return redirect(SIGN_IN);
-
+  if (!user) return redirect("/sign-in");
   const invitationExists = await db.invitation.findUnique({
     where: {
       email: user.emailAddresses[0].emailAddress,
@@ -165,33 +163,30 @@ export const verifyAndAcceptInvitation = async () => {
       agencyId: invitationExists.agencyId,
       avatarUrl: user.imageUrl,
       id: user.id,
-      name: `${user.firstName} $${user.lastName}`,
+      name: `${user.firstName} ${user.lastName}`,
       role: invitationExists.role,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
-
     await saveActivityLogsNotification({
-      agencyId: invitationExists.agencyId,
-      description: "Joined",
+      agencyId: invitationExists?.agencyId,
+      description: `Joined`,
       subaccountId: undefined,
     });
 
     if (userDetails) {
       await clerkClient.users.updateUserMetadata(user.id, {
         privateMetadata: {
-          role: userDetails.role || SUBACCOUNT_USER,
+          role: userDetails.role || "SUBACCOUNT_USER",
         },
       });
 
       await db.invitation.delete({
-        where: { email: userDetails?.email },
+        where: { email: userDetails.email },
       });
 
-      return userDetails?.agencyId;
-    } else {
-      return null;
-    }
+      return userDetails.agencyId;
+    } else return null;
   } else {
     const agency = await db.user.findUnique({
       where: {
@@ -297,5 +292,19 @@ export const upsertAgency = async (agency: Agency, price?: Plan) => {
     return agencyDetails;
   } catch (error: any) {
     console.error(error.message);
+  }
+};
+
+export const getNotificationAndUser = async (agencyId: string) => {
+  try {
+    const response = await db.notification.findMany({
+      where: { agencyId },
+      include: { User: true },
+      orderBy: { createdAt: "desc" },
+    });
+
+    return response;
+  } catch (error) {
+    console.error(error);
   }
 };
