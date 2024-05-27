@@ -75,9 +75,9 @@ const InfoBar = ({ notifications, subAccountId, className, role }: Props) => {
               {allNotifications?.map((notification) => (
                 <div
                   key={notification.id}
-                  className="flex flex-col gap-y-2 mb-2 overflow-x-scroll text-ellipsis"
+                  className="flex flex-col gap-y-4 mb-2 overflow-x-scroll no-scrollbar text-ellipsis"
                 >
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 items-center ">
                     <Avatar>
                       <AvatarImage
                         src={notification.User.avatarUrl}
@@ -101,6 +101,8 @@ const InfoBar = ({ notifications, subAccountId, className, role }: Props) => {
                       </p>
                       <small className="text-xs text-muted-foreground">
                         {new Date(notification.createdAt).toLocaleDateString()}
+                        {" | "}
+                        {new Date(notification.createdAt).toLocaleTimeString()}
                       </small>
                     </div>
                   </div>
