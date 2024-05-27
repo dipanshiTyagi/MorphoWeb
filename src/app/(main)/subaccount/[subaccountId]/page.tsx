@@ -8,4 +8,4 @@ const SubaccountPageID = (props: Props) => {
   )
 }
 
-export default SubaccountPageID
+export default SubaccountPageID;

@@ -51,7 +51,7 @@ import { Separator } from "../ui/separator";
 import { Switch } from "../ui/switch";
 
 type Props = {
-  id: string;
+  id: string | null;
   type: "agency" | "subaccount";
   userData?: Partial<User>;
   subAccounts?: SubAccount[];
@@ -355,7 +355,7 @@ const UserDetails = ({ id, type, subAccounts, userData }: Props) => {
                     return (
                       <div
                         key={subAccount.id}
-                        className="flex flex-col items-center justify-between rounded-lg border p-4"
+                        className="flex items-center justify-between rounded-lg border p-4 mt-4"
                       >
                         <div>
                           <p>{subAccount.name}</p>
