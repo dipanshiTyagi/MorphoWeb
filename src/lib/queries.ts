@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { SIGN_IN, SUBACCOUNT_USER } from "./constants";
 import { Agency, Plan, Role, SubAccount, User } from "@prisma/client";
 import { v4 } from "uuid";
+import { CreateMediaType } from "./types";
 
 /**
  * A function that check if the user exists with email or not?
@@ -506,4 +507,40 @@ export const sendInvitation = async (
   }
 
   return resposne;
+};
+
+export const createMedia = async (
+  subAccountId: string,
+  mediaFiles: CreateMediaType
+) => {
+  const response = await db.media.create({
+    data: {
+      link: mediaFiles.link,
+      name: mediaFiles.name,
+      subAccountId: subAccountId,
+    },
+  });
+  return response;
+};
+
+export const getMedia = async (subaccountId: string) => {
+  const mediaFiles = await db.subAccount.findUnique({
+    where: {
+      id: subaccountId,
+    },
+    include: {
+      Media: true,
+    },
+  });
+
+  return mediaFiles;
+};
+
+export const deleteMedia = async (mediaId: string) => {
+  const response = await db.media.delete({
+    where: {
+      id: mediaId,
+    },
+  });
+  return response;
 };

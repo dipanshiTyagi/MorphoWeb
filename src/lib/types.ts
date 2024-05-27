@@ -19,7 +19,7 @@ import {
 // } from "./queries";
 import { db } from "./db";
 import { z } from "zod";
-import { getAuthUserDetails, getUserPermissions } from "./queries";
+import { getAuthUserDetails, getMedia, getUserPermissions } from "./queries";
 
 // import Stripe from "stripe";
 
@@ -67,7 +67,7 @@ export type UsersWithAgencySubAccountPermissionsSidebarOptions =
     typeof __getUsersWithAgencySubAccountPermissionsSidebarOptions
   >;
 
-// export type GetMediaFiles = Prisma.PromiseReturnType<typeof getMedia>;
+export type GetMediaFiles = Prisma.PromiseReturnType<typeof getMedia>;
 
 export type CreateMediaType = Prisma.MediaCreateWithoutSubaccountInput;
 
