@@ -1,5 +1,5 @@
 import AgencyDetails from "@/components/forms/agency-details";
-import { SUBACCOUNT } from "@/lib/constants";
+import { SUBACCOUNT_SLUG } from "@/lib/constants";
 import { getAuthUserDetails, verifyAndAcceptInvitation } from "@/lib/queries";
 import { currentUser } from "@clerk/nextjs/server";
 import { Plan } from "@prisma/client";
@@ -12,14 +12,14 @@ const Page = async ({
 }) => {
   const agencyId = await verifyAndAcceptInvitation();
 
-  console.log(agencyId);
+  console.log("AGENCY ID: ", agencyId);
 
   // Get Users details
   const user = await getAuthUserDetails();
 
   if (agencyId) {
     if (user?.role === "SUBACCOUNT_GUEST" || user?.role === "SUBACCOUNT_USER") {
-      return redirect(SUBACCOUNT);
+      return redirect(SUBACCOUNT_SLUG);
     } else if (user?.role === "AGENCY_OWNER" || user?.role === "AGENCY_ADMIN") {
       if (searchParams.plan) {
         return redirect(
