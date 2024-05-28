@@ -19,7 +19,7 @@ import {
 // } from "./queries";
 import { db } from "./db";
 import { z } from "zod";
-import { getAuthUserDetails, getMedia, getUserPermissions } from "./queries";
+import { _getTicketsWithAllRelations, getAuthUserDetails, getMedia, getPipelineDetails, getTicketsWithTags, getUserPermissions } from "./queries";
 
 // import Stripe from "stripe";
 
@@ -92,17 +92,17 @@ export const CreateFunnelFormSchema = z.object({
   favicon: z.string().optional(),
 });
 
-// export type PipelineDetailsWithLanesCardsTagsTickets = Prisma.PromiseReturnType<
-//   typeof getPipelineDetails
-// >;
+export type PipelineDetailsWithLanesCardsTagsTickets = Prisma.PromiseReturnType<
+  typeof getPipelineDetails
+>;
 
 export const LaneFormSchema = z.object({
   name: z.string().min(1),
 });
 
-// export type TicketWithTags = Prisma.PromiseReturnType<
-//   typeof getTicketsWithTags
-// >;
+export type TicketWithTags = Prisma.PromiseReturnType<
+  typeof getTicketsWithTags
+>;
 
 const currencyNumberRegex = /^\d+(\.\d{1,2})?$/;
 
@@ -114,9 +114,9 @@ export const TicketFormSchema = z.object({
   }),
 });
 
-// export type TicketDetails = Prisma.PromiseReturnType<
-//   typeof _getTicketsWithAllRelations
-// >;
+export type TicketDetails = Prisma.PromiseReturnType<
+  typeof _getTicketsWithAllRelations
+>;
 
 export const ContactUserFormSchema = z.object({
   name: z.string().min(1, "Required"),
