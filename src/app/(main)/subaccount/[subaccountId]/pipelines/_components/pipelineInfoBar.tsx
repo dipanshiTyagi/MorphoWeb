@@ -7,6 +7,7 @@ import {
   CommandEmpty,
   CommandGroup,
   CommandItem,
+  CommandList,
 } from "@/components/ui/command";
 import {
   Popover,
@@ -53,48 +54,54 @@ const PipelineInfoBar = ({ pipelineId, pipelines, subAccountId }: Props) => {
               aria-expanded={open}
               className="w-[200px] justify-between"
             >
-              {value
-                ? pipelines.find((pipeline) => pipeline.id === value)?.name
-                : "Select a pipeline..."}
+              {value ? (
+                <span className="overflow-hidden">
+                  {pipelines.find((pipeline) => pipeline.id === value)?.name}
+                </span>
+              ) : (
+                "Select a pipeline..."
+              )}
               <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-[200px] p-0">
             <Command>
-              <CommandEmpty>No pipelines found.</CommandEmpty>
-              <CommandGroup>
-                {pipelines.map((pipeline) => (
-                  <Link
-                    key={pipeline.id}
-                    href={`/subaccount/${subAccountId}/pipelines/${pipeline.id}`}
-                  >
-                    <CommandItem
+              <CommandList>
+                <CommandEmpty>No pipelines found.</CommandEmpty>
+                <CommandGroup>
+                  {pipelines.map((pipeline) => (
+                    <Link
                       key={pipeline.id}
-                      value={pipeline.id}
-                      onSelect={(currentValue) => {
-                        setValue(currentValue);
-                        setOpen(false);
-                      }}
+                      href={`/subaccount/${subAccountId}/pipelines/${pipeline.id}`}
                     >
-                      <Check
-                        className={cn(
-                          "mr-2 h-4 w-4",
-                          value === pipeline.id ? "opacity-100" : "opacity-0"
-                        )}
-                      />
-                      {pipeline.name}
-                    </CommandItem>
-                  </Link>
-                ))}
-                <Button
-                  variant="secondary"
-                  className="flex gap-2 w-full mt-4"
-                  onClick={handleClickCreatePipeline}
-                >
-                  <Plus size={15} />
-                  Create Pipeline
-                </Button>
-              </CommandGroup>
+                      <CommandItem
+                        key={pipeline.id}
+                        value={pipeline.id}
+                        onSelect={(currentValue) => {
+                          setValue(currentValue);
+                          setOpen(false);
+                        }}
+                      >
+                        <Check
+                          className={cn(
+                            "mr-2 h-4",
+                            value === pipeline.id ? "opacity-100" : "opacity-0"
+                          )}
+                        />
+                        {pipeline.name}
+                      </CommandItem>
+                    </Link>
+                  ))}
+                  <Button
+                    variant="secondary"
+                    className="flex gap-2 w-full mt-4"
+                    onClick={handleClickCreatePipeline}
+                  >
+                    <Plus size={15} />
+                    Create Pipeline
+                  </Button>
+                </CommandGroup>
+              </CommandList>
             </Command>
           </PopoverContent>
         </Popover>
