@@ -255,10 +255,11 @@ export const initUser = async (newUser: Partial<User>) => {
 
 export const upsertAgency = async (agency: Agency, price?: Plan) => {
   if (!agency.companyEmail) return null;
-
   try {
     const agencyDetails = await db.agency.upsert({
-      where: { id: agency.id },
+      where: {
+        id: agency.id,
+      },
       update: agency,
       create: {
         users: {
@@ -301,10 +302,9 @@ export const upsertAgency = async (agency: Agency, price?: Plan) => {
         },
       },
     });
-
     return agencyDetails;
-  } catch (error: any) {
-    console.error(error.message);
+  } catch (error) {
+    console.log(error);
   }
 };
 
