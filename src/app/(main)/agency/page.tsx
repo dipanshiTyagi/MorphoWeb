@@ -28,7 +28,7 @@ const Page = async ({
         );
       }
       if (searchParams.state) {
-        const statePath = searchParams.state.split("__")[0];
+        const statePath = searchParams.state.split("___")[0];
         const stateAgencyID = searchParams.state.split("___")[1];
 
         if (!stateAgencyID) {
