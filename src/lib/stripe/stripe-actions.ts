@@ -54,6 +54,7 @@ export const getConnectAccountProducts = async (stripeAccount: string) => {
     },
     { stripeAccount }
   );
+  console.log("I am from Stripe Actions: ", products.data, stripeAccount);
 
   return products.data;
 };

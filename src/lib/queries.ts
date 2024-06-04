@@ -499,11 +499,13 @@ export const sendInvitation = async (
   email: string,
   agencyId: string
 ) => {
-  const resposne = await db.invitation.create({
-    data: { email, agencyId, role },
-  });
-
   try {
+    // Create an invitation in your database
+    const response = await db.invitation.create({
+      data: { email, agencyId, role },
+    });
+
+    // Create an invitation using Clerk
     const invitation = await clerkClient.invitations.createInvitation({
       emailAddress: email,
       redirectUrl: process.env.NEXT_PUBLIC_URL,
@@ -512,12 +514,13 @@ export const sendInvitation = async (
         role,
       },
     });
+
+    // If Clerk invitation is successful, return the database response
+    return response;
   } catch (error) {
-    console.log(error);
+    console.log("Error sending invitation:", error);
     throw error;
   }
-
-  return resposne;
 };
 
 export const createMedia = async (
@@ -840,4 +843,39 @@ export const upsertContact = async (
   });
 
   return response;
+};
+
+export const getFunnels = async (subacountId: string) => {
+  const funnels = await db.funnel.findMany({
+    where: { subAccountId: subacountId },
+    include: { FunnelPages: true },
+  });
+
+  return funnels;
+};
+
+export const getFunnel = async (funnelId: string) => {
+  const funnel = await db.funnel.findUnique({
+    where: { id: funnelId },
+    include: {
+      FunnelPages: {
+        orderBy: {
+          order: "asc",
+        },
+      },
+    },
+  });
+
+  return funnel;
+};
+
+export const updateFunnelProducts = async (
+  products: string,
+  funnelId: string
+) => {
+  const data = await db.funnel.update({
+    where: { id: funnelId },
+    data: { liveProducts: products },
+  });
+  return data;
 };

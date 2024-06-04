@@ -133,7 +133,7 @@ const SubAccountDetails: React.FC<SubAccountDetailsProps> = ({
 
   const isLoading = form.formState.isSubmitting;
 
-  // ADD Subscription Restrictions according to Selected Plan
+  // ADD Subscription Restrictions according to Selected Plan.
   //CHALLENGE Create this form.
   return (
     <Card className="w-full">

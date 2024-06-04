@@ -1,4 +1,4 @@
-'use client'
+"use client";
 import SubAccountDetails from "@/components/forms/subaccount-details";
 import CustomModal from "@/components/global/custom-modal";
 import { Button } from "@/components/ui/button";
@@ -29,6 +29,7 @@ const CreateSubaccountButton = ({ className, id, user }: Props) => {
   const agencyDetails = user.Agency;
 
   if (!agencyDetails) return;
+
   return (
     <Button
       className={twMerge("w-full flex gap-4", className)}
