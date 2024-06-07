@@ -47,8 +47,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "../ui/alert-dialog";
-
-import { AGENCY_OWNER } from "@/lib/constants";
 import FileUpload from "../global/file-upload";
 import Loading from "../global/loading";
 
@@ -101,9 +99,9 @@ const AgencyDetails = ({ data }: Props) => {
   }, [data]);
 
   const handleSubmit = async (values: z.infer<typeof FormSchema>) => {
-    let newUserData;
     try {
-      // Ensure the user creation process is complete before creating/upserting the agency
+      let newUserData;
+      let custId;
       if (!data?.id) {
         const bodyData = {
           email: values.companyEmail,
@@ -114,7 +112,7 @@ const AgencyDetails = ({ data }: Props) => {
               country: values.country,
               line1: values.address,
               postal_code: values.zipCode,
-              state: values.state,
+              state: values.zipCode,
             },
             name: values.name,
           },
@@ -127,19 +125,24 @@ const AgencyDetails = ({ data }: Props) => {
           },
         };
 
-        // Create the user and get user data
-        newUserData = await initUser({ role: AGENCY_OWNER });
-
-        if (!newUserData || !newUserData.id) {
-          throw new Error("User creation failed");
-        }
+        const customerResponse = await fetch("/api/stripe/create-customer", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(bodyData),
+        });
+        const customerData: { customerId: string } =
+          await customerResponse.json();
+        custId = customerData.customerId;
       }
 
-      console.log(data);
+      newUserData = await initUser({ role: "AGENCY_OWNER" });
+      if (!data?.customerId && !custId) return;
 
-      // Upsert the agency with the new user ID if user was created, otherwise use existing data
-      await upsertAgency({
+      const response = await upsertAgency({
         id: data?.id ? data.id : v4(),
+        customerId: data?.customerId || custId || "",
         address: values.address,
         agencyLogo: values.agencyLogo,
         city: values.city,
@@ -159,14 +162,16 @@ const AgencyDetails = ({ data }: Props) => {
       toast({
         title: "Created Agency",
       });
-
-      return router.refresh();
+      if (data?.id) return router.refresh();
+      if (response) {
+        return router.refresh();
+      }
     } catch (error) {
-      console.error(error);
+      console.log(error);
       toast({
         variant: "destructive",
         title: "Oppse!",
-        description: "Could not create or update your agency",
+        description: "could not create your agency",
       });
     }
   };

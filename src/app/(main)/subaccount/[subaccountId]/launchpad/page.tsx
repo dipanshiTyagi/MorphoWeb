@@ -1,3 +1,4 @@
+import BlurPage from "@/components/global/blur-page";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -7,6 +8,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { db } from "@/lib/db";
+import { stripe } from "@/lib/stripe";
+import { getStripeOAuthLink } from "@/lib/utils";
 import { CheckCircleIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -20,14 +23,16 @@ type Props = {
   params: { subaccountId: string };
 };
 
-const LaunchPadPage = async ({ searchParams, params }: Props) => {
+const LaunchPad = async ({ params, searchParams }: Props) => {
   const subaccountDetails = await db.subAccount.findUnique({
     where: {
       id: params.subaccountId,
     },
   });
 
-  if (!subaccountDetails) return;
+  if (!subaccountDetails) {
+    return;
+  }
 
   const allDetailsExist =
     subaccountDetails.address &&
@@ -38,6 +43,31 @@ const LaunchPadPage = async ({ searchParams, params }: Props) => {
     subaccountDetails.country &&
     subaccountDetails.name &&
     subaccountDetails.state;
+
+  const stripeOAuthLink = getStripeOAuthLink(
+    "subaccount",
+    `launchpad___${subaccountDetails.id}`
+  );
+
+  let connectedStripeAccount = false;
+
+  if (searchParams.code) {
+    if (!subaccountDetails.connectAccountId) {
+      try {
+        const response = await stripe.oauth.token({
+          grant_type: "authorization_code",
+          code: searchParams.code,
+        });
+        await db.subAccount.update({
+          where: { id: params.subaccountId },
+          data: { connectAccountId: response.stripe_user_id },
+        });
+        connectedStripeAccount = true;
+      } catch (error) {
+        console.log("🔴 Could not connect stripe account", error);
+      }
+    }
+  }
 
   return (
     <div className="flex flex-col justify-center items-center">
@@ -72,18 +102,20 @@ const LaunchPadPage = async ({ searchParams, params }: Props) => {
                   width={80}
                   className="rounded-md object-contain "
                 />
-                <p>
-                  Connect your stripe account to accept payments. Stripe is used
-                  to run payouts.
-                </p>
+                {subaccountDetails.connectAccountId ||
+                connectedStripeAccount ? (
+                  <p>
+                    🎉🎉 You have successfully connected your Stripe account
+                    with your sub-account. 🎉🎉
+                  </p>
+                ) : (
+                  <p>
+                    Connect your stripe account to accept payments. Stripe is
+                    used to run payouts.
+                  </p>
+                )}
               </div>
-              <Link
-                className="bg-primary py-2 px-4 rounded-md text-white"
-                href={""}
-              >
-                Start
-              </Link>
-              {/* {subaccountDetails.connectAccountId || connectedStripeAccount ? (
+              {subaccountDetails.connectAccountId || connectedStripeAccount ? (
                 <CheckCircleIcon
                   size={50}
                   className=" text-primary p-2 flex-shrink-0"
@@ -95,7 +127,7 @@ const LaunchPadPage = async ({ searchParams, params }: Props) => {
                 >
                   Start
                 </Link>
-              )} */}
+              )}
             </div>
             <div className="flex justify-between items-center w-full h-20 border p-4 rounded-lg">
               <div className="flex items-center gap-4">
@@ -129,4 +161,4 @@ const LaunchPadPage = async ({ searchParams, params }: Props) => {
   );
 };
 
-export default LaunchPadPage;
+export default LaunchPad;

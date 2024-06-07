@@ -12,17 +12,19 @@ const Navigation = ({ user }: Props) => {
   return (
     <div
       className={
-        "fixed top-0 right-0 left-0 z-10 p-4 flex items-center justify-between relative"
+        "top-0 right-0 left-0 z-10 p-4 flex items-center justify-between relative"
       }
     >
-      <aside className={"flex items-center gap-2"}>
-        <Image
-          src={"./assets/plura-logo.svg"}
-          alt={"Site LOGO"}
-          width={40}
-          height={40}
-        />
-        <span className={"text-xl font-bold"}>Plora.</span>
+      <aside>
+        <Link href={"/"} className="flex items-center gap-2">
+          <Image
+            src={"./assets/plura-logo.svg"}
+            alt={"Site LOGO"}
+            width={40}
+            height={40}
+          />
+          <span className={"text-xl font-bold"}>Plora.</span>
+        </Link>
       </aside>
       <nav
         className={

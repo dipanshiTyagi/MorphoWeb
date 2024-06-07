@@ -1,4 +1,5 @@
 import AgencyDetails from "@/components/forms/agency-details";
+import Navigation from "@/components/site/navigation";
 import { SUBACCOUNT_SLUG } from "@/lib/constants";
 import { getAuthUserDetails, verifyAndAcceptInvitation } from "@/lib/queries";
 import { currentUser } from "@clerk/nextjs/server";
@@ -27,7 +28,7 @@ const Page = async ({
         );
       }
       if (searchParams.state) {
-        const statePath = searchParams.state.split("__")[0];
+        const statePath = searchParams.state.split("___")[0];
         const stateAgencyID = searchParams.state.split("___")[1];
 
         if (!stateAgencyID) {
@@ -46,12 +47,15 @@ const Page = async ({
   const authUser = await currentUser();
 
   return (
-    <div className="flex justify-center items-center mt-4">
-      <div>
-        <h1 className="text-4xl">Create An Agency</h1>
-        <AgencyDetails />
+    <>
+      <Navigation />
+      <div className="flex justify-center items-center mt-4 bg-muted">
+        <div>
+          <h1 className="text-4xl my-8">Create An Agency</h1>
+          <AgencyDetails />
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

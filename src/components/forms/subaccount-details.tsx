@@ -81,6 +81,8 @@ const SubAccountDetails: React.FC<SubAccountDetailsProps> = ({
     },
   });
 
+  console.log(agencyDetails);
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       const response = await upsertSubAccount({
@@ -130,6 +132,8 @@ const SubAccountDetails: React.FC<SubAccountDetailsProps> = ({
   }, [details]);
 
   const isLoading = form.formState.isSubmitting;
+
+  // ADD Subscription Restrictions according to Selected Plan.
   //CHALLENGE Create this form.
   return (
     <Card className="w-full">
