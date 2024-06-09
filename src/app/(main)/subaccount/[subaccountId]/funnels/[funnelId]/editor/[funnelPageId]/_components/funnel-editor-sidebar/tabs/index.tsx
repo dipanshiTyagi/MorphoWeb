@@ -12,7 +12,7 @@ type Props = {};
 const TabList = (props: Props) => {
   return (
     <TabsList className=" flex items-center flex-col justify-evenly w-full bg-transparent h-fit gap-4 ">
-      <Tooltip >
+      <Tooltip>
         <TooltipTrigger>
           <TabsTrigger
             value="Settings"
@@ -57,7 +57,7 @@ const TabList = (props: Props) => {
             <Database />
           </TabsTrigger>
         </TooltipTrigger>
-        <TooltipContent>Database</TooltipContent>
+        <TooltipContent>Media Bucket</TooltipContent>
       </Tooltip>
     </TabsList>
   );

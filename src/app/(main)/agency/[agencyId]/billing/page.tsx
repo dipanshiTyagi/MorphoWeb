@@ -1,9 +1,9 @@
-import { Separator } from "@/components/ui/separator";
+import React from "react";
+import { stripe } from "@/lib/stripe";
 import { addOnProducts, pricingCards } from "@/lib/constants";
 import { db } from "@/lib/db";
-import { stripe } from "@/lib/stripe";
-import React from "react";
-import PricingCards from "./_components/pricing-card";
+import { Separator } from "@/components/ui/separator";
+import PricingCard from "./_components/pricing-card";
 import {
   Table,
   TableBody,
@@ -13,12 +13,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import clsx from "clsx";
+import SubscriptionHelper from "./_components/subscription-helper";
 
 type Props = {
   params: { agencyId: string };
 };
 
-const BillingPage = async ({ params }: Props) => {
+const page = async ({ params }: Props) => {
   //CHALLENGE : Create the add on  products
   const addOns = await stripe.products.list({
     ids: addOnProducts.map((product) => product.id),
@@ -34,6 +35,8 @@ const BillingPage = async ({ params }: Props) => {
       Subscription: true,
     },
   });
+
+  console.log("MY AGENCY SUB: ", agencySubscription);
 
   const prices = await stripe.prices.list({
     product: process.env.NEXT_PLURA_PRODUCT_ID,
@@ -60,13 +63,19 @@ const BillingPage = async ({ params }: Props) => {
       amount: `$${charge.amount / 100}`,
     })),
   ];
+
   return (
     <>
+      <SubscriptionHelper
+        prices={prices.data}
+        customerId={agencySubscription?.customerId || ""}
+        planExists={agencySubscription?.Subscription?.active === true}
+      />
       <h1 className="text-4xl p-4">Billing</h1>
-      <Separator className="mb-6" />
+      <Separator className=" mb-6" />
       <h2 className="text-2xl p-4">Current Plan</h2>
-      <div className="flex flex-col lg:flex-row justify-between gap-8">
-        <PricingCards
+      <div className="flex flex-col lg:!flex-row justify-between gap-8">
+        <PricingCard
           planExists={agencySubscription?.Subscription?.active === true}
           prices={prices.data}
           customerId={agencySubscription?.customerId || ""}
@@ -104,7 +113,7 @@ const BillingPage = async ({ params }: Props) => {
           }
         />
         {addOns.data.map((addOn) => (
-          <PricingCards
+          <PricingCard
             planExists={agencySubscription?.Subscription?.active === true}
             prices={prices.data}
             customerId={agencySubscription?.customerId || ""}
@@ -126,7 +135,8 @@ const BillingPage = async ({ params }: Props) => {
           />
         ))}
       </div>
-      <Table className="bg-card border-[1px] border-border rounded-md mt-8">
+      <h2 className="text-2xl p-4">Payment History</h2>
+      <Table className="bg-card border-[1px] border-border rounded-md">
         <TableHeader className="rounded-md">
           <TableRow>
             <TableHead className="w-[200px]">Description</TableHead>
@@ -165,4 +175,4 @@ const BillingPage = async ({ params }: Props) => {
   );
 };
 
-export default BillingPage;
+export default page;
