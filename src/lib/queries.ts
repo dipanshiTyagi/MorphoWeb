@@ -572,14 +572,6 @@ export const getPipelineDetails = async (pipelineId: string) => {
   return response;
 };
 
-export const getPipelines = async (subAccountId: string) => {
-  const response = await db.pipeline.findMany({
-    where: { subAccountId: subAccountId },
-  });
-
-  return response;
-};
-
 export const getLanesWithTicketAndTags = async (pipelineId: string) => {
   const response = await db.lane.findMany({
     where: {
@@ -918,5 +910,36 @@ export const upsertFunnelPage = async (
 export const deleteFunnelePage = async (funnelPageId: string) => {
   const response = await db.funnelPage.delete({ where: { id: funnelPageId } });
 
+  return response;
+};
+
+export const getFunnelPageDetails = async (funnelPageId: string) => {
+  const response = await db.funnelPage.findUnique({
+    where: {
+      id: funnelPageId,
+    },
+  });
+
+  return response;
+};
+
+export const getDomainContent = async (subDomainName: string) => {
+  const response = await db.funnel.findUnique({
+    where: { subDomainName },
+    include: { FunnelPages: true },
+  });
+
+  return response;
+};
+
+export const getPipelines = async (subaccountId: string) => {
+  const response = await db.pipeline.findMany({
+    where: { subAccountId: subaccountId },
+    include: {
+      Lane: {
+        include: { Tickets: true },
+      },
+    },
+  });
   return response;
 };

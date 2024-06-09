@@ -1,5 +1,6 @@
 import SubAccountDetails from "@/components/forms/subaccount-details";
 import UserDetails from "@/components/forms/user-details";
+import BlurPage from "@/components/global/blur-page";
 import { db } from "@/lib/db";
 import { currentUser } from "@clerk/nextjs/server";
 import React from "react";
@@ -34,21 +35,23 @@ const SubAccountSettingsPage = async ({ params }: Props) => {
   const subAccounts = agencyDetails.SubAccount;
 
   return (
-    <div className="flex lg:!flex-row flex-col gap-4">
-      <SubAccountDetails
-        agencyDetails={agencyDetails}
-        userId={userDetails.id}
-        userName={userDetails.name}
-        details={subAccount}
-      />
+    <BlurPage>
+      <div className="flex lg:!flex-row flex-col gap-4">
+        <SubAccountDetails
+          agencyDetails={agencyDetails}
+          userId={userDetails.id}
+          userName={userDetails.name}
+          details={subAccount}
+        />
 
-      <UserDetails
-        id={params.subaccountId}
-        subAccounts={subAccounts}
-        userData={userDetails}
-        type={"subaccount"}
-      />
-    </div>
+        <UserDetails
+          id={params.subaccountId}
+          subAccounts={subAccounts}
+          userData={userDetails}
+          type={"subaccount"}
+        />
+      </div>
+    </BlurPage>
   );
 };
 

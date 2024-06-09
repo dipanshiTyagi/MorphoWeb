@@ -1,9 +1,14 @@
+import BlurPage from "@/components/global/blur-page";
 import React from "react";
 
 type Props = {};
 
 const DashboardPage = (props: Props) => {
-  return <div>DashboardPage</div>;
+  return (
+    <BlurPage>
+      <div>DashboardPage</div>
+    </BlurPage>
+  );
 };
 
 export default DashboardPage;

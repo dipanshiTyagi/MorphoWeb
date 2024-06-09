@@ -11,8 +11,14 @@ import {
 import { clsx } from "clsx";
 import { Check } from "lucide-react";
 import Link from "next/link";
+import { stripe } from "@/lib/stripe";
 
-export default function Home() {
+export default async function Home() {
+  const prices = await stripe.prices.list({
+    product: process.env.NEXT_PLURA_PRODUCT_ID,
+    active: true,
+  });
+
   return (
     <main className="">
       <section className="h-full w-full pt-36 relative flex items-center justify-center flex-col ">
@@ -51,48 +57,57 @@ export default function Home() {
           {" you're"} not <br /> ready to commit you can get started for free.
         </p>
         <div className="flex justify-center gap-4 flex-wrap mt-6">
-          {pricingCards.map((pricingCard) => (
+          {prices.data.map((pricingCard) => (
             // WIP: Wire up free product from strip.
             <Card
-              key={pricingCard.title}
+              key={pricingCard.nickname}
               className={clsx("w-[300px] flex flex-col justify-between", {
                 "border-2 border-primary":
-                  pricingCard.title === "Unlimited Saas",
+                  pricingCard.nickname === "Unlimited SaaS",
               })}
             >
               <CardHeader>
                 <CardTitle
                   className={clsx("", {
                     "text-muted-foreground":
-                      pricingCard.title !== "Unlimited Saas",
+                      pricingCard.nickname !== "Unlimited SaaS",
                   })}
                 >
-                  {pricingCard.title}
+                  {pricingCard.nickname}
                 </CardTitle>
-                <CardDescription>{pricingCard.description}</CardDescription>
+                <CardDescription>
+                  {
+                    pricingCards.find((c) => c.title === pricingCard.nickname)
+                      ?.description
+                  }
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <span className={"text-4xl font-bold"}>
-                  {pricingCard.price}
+                  {pricingCard.unit_amount && pricingCard.unit_amount / 100}
                 </span>
-                <span className={"text-muted-foreground"}>/m</span>
+                <span className={"text-muted-foreground"}>
+                  / {pricingCard.recurring?.interval}
+                </span>
               </CardContent>
               <CardFooter className={"flex flex-col items-start gap-4"}>
                 <div>
-                  {pricingCard.features.map((feature) => (
-                    <div key={feature} className={"flex gap-2 items-center"}>
-                      <Check className={"text-muted-foreground"} />
-                      <p>{feature}</p>
-                    </div>
-                  ))}
+                  {pricingCards
+                    .find((c) => c.title === pricingCard.nickname)
+                    ?.features.map((feature) => (
+                      <div key={feature} className={"flex gap-2 items-center"}>
+                        <Check className={"text-muted-foreground"} />
+                        <p>{feature}</p>
+                      </div>
+                    ))}
                 </div>
                 <Link
-                  href={`/agency?plan=${pricingCard.priceId}`}
+                  href={`/agency?plan=${pricingCard.id}`}
                   className={clsx(
                     "w-full text-center bg-primary" + " p-2 rounded-md",
                     {
                       "!bg-muted-foreground":
-                        pricingCard.title !== "Unlimited Saas",
+                        pricingCard.nickname !== "Unlimited SaaS",
                     }
                   )}
                 >
@@ -101,6 +116,46 @@ export default function Home() {
               </CardFooter>
             </Card>
           ))}
+
+          <Card className={"w-[300px] flex flex-col justify-between"}>
+            <CardHeader>
+              <CardTitle
+                className={clsx("", {
+                  "text-muted-foreground": true,
+                })}
+              >
+                {pricingCards[0].title}
+              </CardTitle>
+              <CardDescription>{pricingCards[0].description}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <span className={"text-4xl font-bold"}>
+                {pricingCards[0].duration || 0}
+              </span>
+              <span className={"text-muted-foreground"}>/ month</span>
+            </CardContent>
+            <CardFooter className={"flex flex-col items-start gap-4"}>
+              <div>
+                {pricingCards[0]?.features.map((feature) => (
+                  <div key={feature} className={"flex gap-2 items-center"}>
+                    <Check className={"text-muted-foreground"} />
+                    <p>{feature}</p>
+                  </div>
+                ))}
+              </div>
+              <Link
+                href={`/agency?plan=${pricingCards[0].priceId}`}
+                className={clsx(
+                  "w-full text-center bg-primary" + " p-2 rounded-md",
+                  {
+                    "!bg-muted-foreground": true,
+                  }
+                )}
+              >
+                Get Started
+              </Link>
+            </CardFooter>
+          </Card>
         </div>
       </section>
     </main>
