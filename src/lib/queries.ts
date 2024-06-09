@@ -572,14 +572,6 @@ export const getPipelineDetails = async (pipelineId: string) => {
   return response;
 };
 
-export const getPipelines = async (subAccountId: string) => {
-  const response = await db.pipeline.findMany({
-    where: { subAccountId: subAccountId },
-  });
-
-  return response;
-};
-
 export const getLanesWithTicketAndTags = async (pipelineId: string) => {
   const response = await db.lane.findMany({
     where: {
@@ -937,5 +929,17 @@ export const getDomainContent = async (subDomainName: string) => {
     include: { FunnelPages: true },
   });
 
+  return response;
+};
+
+export const getPipelines = async (subaccountId: string) => {
+  const response = await db.pipeline.findMany({
+    where: { subAccountId: subaccountId },
+    include: {
+      Lane: {
+        include: { Tickets: true },
+      },
+    },
+  });
   return response;
 };
