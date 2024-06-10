@@ -22,7 +22,7 @@
 - 📈 Stripe Product Sync
 - 📌Custom checkouts on funnels
 - 📢 Get leads from funnels
-- 🎨 Khanban board
+- 🎨 Kanban board
 - 📂 Project management system
 - 🔗 Notifications
 - 📆 Funnel performance metrics
@@ -35,5 +35,9 @@
 ## Website with background grids
 [ibelick](https://bg.ibelick.com/)
 
-## Shadcn UI Theme creator
+## Shadcn UI Theme Creator
 [Link To Website](https://gradient.page/tools/shadcn-ui-theme-generator)
+
+#NOTE
+Sorry to say that this is a practice project but the MySQL Service (PlanetScale) is a paid service. So, It may not work when you try to reach it.
+I'm looking for resources to update it with any free service.
