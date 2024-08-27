@@ -42,7 +42,9 @@
 Sorry to say that this is a practice project but the MySQL Service (PlanetScale) is a paid service. So, It may not work when you try to reach it.
 I'm looking for resources to update it with any free service.
 
-so,
+Thanks to the People who have looked this project when it was not working as expected. 
+Now, I have updated Today: **8/27/2024** using the service named aiven.io. It offeres free MySQL services for Now.
+
 # Screenshots of Running Project
 
 ### Landing Page Light Version SS
