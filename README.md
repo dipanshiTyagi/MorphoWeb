@@ -38,7 +38,7 @@
 ## Shadcn UI Theme Creator
 [Link To Website](https://gradient.page/tools/shadcn-ui-theme-generator)
 
-#NOTE
+# NOTE
 Sorry to say that this is a practice project but the MySQL Service (PlanetScale) is a paid service. So, It may not work when you try to reach it.
 I'm looking for resources to update it with any free service.
 
