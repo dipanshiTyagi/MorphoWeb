@@ -2,9 +2,9 @@
 
 ![Application Logo](https://storage.googleapis.com/msgsndr/0wtSXexlPhMN1945ooxW/media/65b7c3d24660477daf3d6708.png)
 
-| 🟢 Full Video | 🔴 Demo |
+<!-- | 🟢 Full Video | 🔴 Demo |
 |------------|------|
-| [Full Video](https://youtu.be/6omuUOZcWL0) | [Demo](https://meplura.vercel.app/) |
+| [Full Video](https://youtu.be/6omuUOZcWL0) | [Demo](https://meplura.vercel.app/) | -->
 
 
 ### Features in this application.
@@ -38,20 +38,15 @@
 ## Shadcn UI Theme Creator
 [Link To Website](https://gradient.page/tools/shadcn-ui-theme-generator)
 
-# NOTE
-Sorry to say that this is a practice project but the MySQL Service (PlanetScale) is a paid service. So, It may not work when you try to reach it.
-I'm looking for resources to update it with any free service.
 
-Thanks to the People who have looked this project when it was not working as expected. 
-Now, I have updated Today: **8/27/2024** using the service named aiven.io. It offeres free MySQL services for Now.
 
 # Screenshots of Running Project
 
 ### Landing Page Light Version SS
-![Home ME-Plura-light](https://github.com/ahmadiqbalbhatti/me-plura/assets/52331296/4375d9f9-b475-4fa7-9bf6-17eaf03fe2d2)
+![site-light](https://github.com/ahmadiqbalbhatti/me-plura/assets/52331296/4375d9f9-b475-4fa7-9bf6-17eaf03fe2d2)
 
 ### Landing Page Dark Version SS
-![Home ME-Plura](https://github.com/ahmadiqbalbhatti/me-plura/assets/52331296/29fa3db9-29e9-4c31-905c-cd9cc47397ac)
+![site-dark](https://github.com/ahmadiqbalbhatti/me-plura/assets/52331296/29fa3db9-29e9-4c31-905c-cd9cc47397ac)
 
 ## Agency Dashboard Pages
 ### Dashboard
