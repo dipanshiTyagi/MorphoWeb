@@ -47,15 +47,15 @@ const Page = async ({
 
   if (!agencyDetails) return;
 
-  const subaccounts = await db.subAccount.findMany({
+  const subaccounts = await db.subaccount.findMany({
     where: {
       agencyId: params.agencyId,
     },
   });
 
-  if (agencyDetails.connectAccountId) {
+  if (agencyDetails.connectedAccountId) {
     const response = await stripe.accounts.retrieve({
-      stripeAccount: agencyDetails.connectAccountId,
+      stripeAccount: agencyDetails.connectedAccountId,
     });
 
     currency = response.default_currency?.toUpperCase() || "USD";
@@ -64,7 +64,7 @@ const Page = async ({
         created: { gte: startDate, lte: endDate },
         limit: 100,
       },
-      { stripeAccount: agencyDetails.connectAccountId }
+      { stripeAccount: agencyDetails.connectedAccountId }
     );
     sessions = checkoutSessions.data;
     totalClosedSessions = checkoutSessions.data
@@ -98,7 +98,7 @@ const Page = async ({
 
   return (
     <div className="relative h-full">
-      {!agencyDetails.connectAccountId && (
+      {!agencyDetails.connectedAccountId && (
         <div className="absolute -top-10 -left-10 right-0 bottom-0 z-30 flex items-center justify-center backdrop-blur-md bg-background/50">
           <Card>
             <CardHeader>

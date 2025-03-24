@@ -3,13 +3,13 @@ import Navigation from "@/components/site/navigation";
 import { SUBACCOUNT_SLUG } from "@/lib/constants";
 import { getAuthUserDetails, verifyAndAcceptInvitation } from "@/lib/queries";
 import { currentUser } from "@clerk/nextjs/server";
-import { Plan } from "@prisma/client";
+import { subscription_plan } from "@prisma/client";
 import { redirect } from "next/navigation";
 
 const Page = async ({
   searchParams,
 }: {
-  searchParams: { plan: Plan; state: string; code: string };
+  searchParams: { plan: subscription_plan; state: string; code: string };
 }) => {
   const agencyId = await verifyAndAcceptInvitation();
 

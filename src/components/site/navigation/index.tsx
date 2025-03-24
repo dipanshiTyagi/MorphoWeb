@@ -18,12 +18,12 @@ const Navigation = ({ user }: Props) => {
       <aside>
         <Link href={"/"} className="flex items-center gap-2">
           <Image
-            src={"./assets/plura-logo.svg"}
+            src={"/assets/morphoweb_logo.png"}
             alt={"Site LOGO"}
-            width={40}
-            height={40}
+            width={60}
+            height={60}
           />
-          <span className={"text-xl font-bold"}>Plora.</span>
+          <span className={"text-xl font-bold"}>MorphoWeb.</span>
         </Link>
       </aside>
       <nav

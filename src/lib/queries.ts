@@ -5,15 +5,15 @@ import { db } from "./db";
 import { redirect } from "next/navigation";
 import { SIGN_IN, SUBACCOUNT_USER } from "./constants";
 import {
-  Agency,
-  Lane,
-  Plan,
+  agency,
+  invitation_role,
+  lane,
   Prisma,
-  Role,
-  SubAccount,
-  Tag,
-  Ticket,
-  User,
+  subaccount,
+  subscription_plan,
+  tag,
+  ticket,
+  user,
 } from "@prisma/client";
 import { v4 } from "uuid";
 import {
@@ -28,32 +28,73 @@ import { revalidatePath } from "next/cache";
  * A function that check if the user exists with email or not?
  * @returns userDate
  */
+// export const getAuthUserDetails = async () => {
+//   const user = await currentUser();
+//   if (!user) {
+//     return;
+//   }
+
+//   const userData = await db.user.findUnique({
+//     where: {
+//       email: user.emailAddresses[0].emailAddress,
+//     },
+//     include: {
+//       Agency: {
+//         include: {
+//           SidebarOption: true,
+//           SubAccount: {
+//             include: {
+//               SidebarOption: true,
+//             },
+//           },
+//         },
+//       },
+//       Permissions: true,
+//     },
+//   });
+
+//   return userData;
+// };
+
 export const getAuthUserDetails = async () => {
   const user = await currentUser();
-  if (!user) {
-    return;
+  if (!user || !user.emailAddresses || user.emailAddresses.length === 0) {
+    console.error("User is not logged in or email address is missing.");
+    return null;
   }
 
-  const userData = await db.user.findUnique({
-    where: {
-      email: user.emailAddresses[0].emailAddress,
-    },
-    include: {
-      Agency: {
-        include: {
-          SidebarOption: true,
-          SubAccount: {
-            include: {
-              SidebarOption: true,
-            },
+  const email = user.emailAddresses[0]?.emailAddress;
+  if (!email) {
+    console.error("Email address is undefined.");
+    return null;
+  }
+
+  try {
+    const userData = await db.user.findUnique({
+      where: {
+        email: email,
+      },
+      include: {
+        agency: {
+          include: {
+            // SidebarOption: true, // Removed as it is not a valid property
+            // SubAccount property removed as it is not valid in agencyInclude type
           },
         },
+        // Permissions: true, // Removed as it is not a valid property
       },
-      Permissions: true,
-    },
-  });
+    });
 
-  return userData;
+    if (!userData) {
+      console.error(`No user found with email: ${email}`);
+      return null;
+    }
+
+    return userData;
+  } catch (error) {
+    console.error("Error fetching user details:", error);
+    throw error;
+  }
 };
 
 export const saveActivityLogsNotification = async ({
@@ -72,7 +113,7 @@ export const saveActivityLogsNotification = async ({
   if (!authUser) {
     const response = await db.user.findFirst({
       where: {
-        Agency: {
+        agency: {
           SubAccount: {
             some: { id: subaccountId },
           },
@@ -105,7 +146,7 @@ export const saveActivityLogsNotification = async ({
       );
     }
 
-    const response = await db.subAccount.findUnique({
+    const response = await db.subaccount.findUnique({
       where: { id: subaccountId },
     });
 
@@ -116,7 +157,7 @@ export const saveActivityLogsNotification = async ({
     await db.notification.create({
       data: {
         notification: `${userData.name} | ${description}`,
-        User: {
+        user: {
           connect: {
             id: userData.id,
           },
@@ -137,7 +178,7 @@ export const saveActivityLogsNotification = async ({
     await db.notification.create({
       data: {
         notification: `${userData.name} | ${description}`,
-        User: {
+        user: {
           connect: {
             id: userData.id,
           },
@@ -158,7 +199,7 @@ export const saveActivityLogsNotification = async ({
  * @param user From Prisma client
  * @returns Response If user is created or not.
  */
-export const createTeamUser = async (agencyId: string, user: User) => {
+export const createTeamUser = async (agencyId: string, user: user) => {
   if (user.role === "AGENCY_OWNER") return null;
 
   const response = await db.user.create({ data: { ...user } });
@@ -218,7 +259,7 @@ export const verifyAndAcceptInvitation = async () => {
 
 export const updateAgencyDetails = async (
   agencyId: string,
-  agencyDetails: Partial<Agency>
+  agencyDetails: Partial<agency>
 ) => {
   const response = await db.agency.update({
     where: { id: agencyId },
@@ -232,7 +273,7 @@ export const deleteAgency = async (agencyId: string) => {
   return response;
 };
 
-export const initUser = async (newUser: Partial<User>) => {
+export const initUser = async (newUser: Partial<user>) => {
   const user = await currentUser();
 
   if (!user) return;
@@ -246,6 +287,8 @@ export const initUser = async (newUser: Partial<User>) => {
       email: user.emailAddresses[0].emailAddress,
       name: `${user.firstName} ${user.lastName}`,
       role: newUser.role || "SUBACCOUNT_USER",
+      updatedAt: new Date(),
+      createdAt: new Date(),
     },
   });
 
@@ -258,50 +301,217 @@ export const initUser = async (newUser: Partial<User>) => {
   return userData;
 };
 
-export const upsertAgency = async (agency: Agency, price?: Plan) => {
+// export const upsertAgency = async (agency: agency, price?: subscription_plan) => {
+//   if (!agency.companyEmail) return null;
+//   try {
+//     const agencyDetails = await db.agency.upsert({
+//       where: {
+//         id: agency.id,
+//       },
+//       update: agency,
+//       create: {
+//         users: {
+//           connect: { email: agency.companyEmail },
+//         },
+//         ...agency,
+//         SidebarOption: {
+//           create: [
+//             {
+//               name: "Dashboard",
+//               icon: "category",
+//               link: `/agency/${agency.id}`,
+//             },
+//             {
+//               name: "Launchpad",
+//               icon: "clipboardIcon",
+//               link: `/agency/${agency.id}/launchpad`,
+//             },
+//             {
+//               name: "Billing",
+//               icon: "payment",
+//               link: `/agency/${agency.id}/billing`,
+//             },
+//             {
+//               name: "Settings",
+//               icon: "settings",
+//               link: `/agency/${agency.id}/settings`,
+//             },
+//             {
+//               name: "Sub Accounts",
+//               icon: "person",
+//               link: `/agency/${agency.id}/all-subaccounts`,
+//             },
+//             {
+//               name: "Team",
+//               icon: "shield",
+//               link: `/agency/${agency.id}/team`,
+//             },
+//           ],
+//         },
+//       },
+//     });
+//     return agencyDetails;
+//   } catch (error) {
+//     console.log(error);
+//   }
+// };
+
+// export const upsertAgency = async (agency: agency, price?: subscription_plan) => {
+//   if (!agency.companyEmail) return null;
+//   try {
+//     const agencyDetails = await db.agency.upsert({
+//       where: {
+//         id: agency.id,
+//       },
+//       update: {
+//         ...agency,
+//         connectedAccountId: agency.connectedAccountId || "", // Ensure the correct field name is used
+//       },
+//       create: {
+//         users: {
+//           connect: { email: agency.companyEmail },
+//         },
+//         ...agency,
+//         connectedAccountId: agency.connectedAccountId || "", // Ensure the correct field name is used
+//         sidebarOptions: {
+//           create: [
+//             {
+//               id: v4(), // Generate a unique ID
+//               name: "Dashboard",
+//               icon: "category",
+//               link: `/agency/${agency.id}`,
+//               updatedAt: new Date(), // Set the current date and time
+//             },
+//             {
+//               id: v4(), // Generate a unique ID
+//               name: "Launchpad",
+//               icon: "clipboardIcon",
+//               link: `/agency/${agency.id}/launchpad`,
+//               updatedAt: new Date(), // Set the current date and time
+//             },
+//             {
+//               id: v4(), // Generate a unique ID
+//               name: "Billing",
+//               icon: "payment",
+//               link: `/agency/${agency.id}/billing`,
+//               updatedAt: new Date(), // Set the current date and time
+//             },
+//             {
+//               id: v4(),
+//               name: "Settings",
+//               icon: "settings",
+//               link: `/agency/${agency.id}/settings`,
+//             },
+//             {
+            
+//               name: "Sub Accounts",
+//               icon: "person",
+//               link: `/agency/${agency.id}/all-subaccounts`,
+//             },
+//             {
+//               name: "Team",
+//               icon: "shield",
+//               link: `/agency/${agency.id}/team`,
+//             },
+//           ],
+//         },
+//       },
+//     });
+//     return agencyDetails;
+//   } catch (error) {
+//     console.log("Error in upsertAgency:", error);
+//     throw error;
+//   }
+// };
+
+export const upsertAgency = async (agency: agency, price?: subscription_plan) => {
   if (!agency.companyEmail) return null;
+
   try {
     const agencyDetails = await db.agency.upsert({
       where: {
         id: agency.id,
       },
-      update: agency,
+      update: {
+        id: agency.id,
+        connectedAccountId: agency.connectedAccountId || "",
+        customerId: agency.customerId,
+        name: agency.name,
+        agencyLogo: agency.agencyLogo,
+        companyEmail: agency.companyEmail,
+        companyPhone: agency.companyPhone,
+        whiteLabel: agency.whiteLabel,
+        address: agency.address,
+        city: agency.city,
+        zipCode: agency.zipCode,
+        state: agency.state,
+        country: agency.country,
+        goal: agency.goal,
+        updatedAt: new Date(), // Explicitly set updatedAt
+      },
       create: {
+        id: agency.id,
+        connectedAccountId: agency.connectedAccountId || "",
+        customerId: agency.customerId,
+        name: agency.name,
+        agencyLogo: agency.agencyLogo,
+        companyEmail: agency.companyEmail,
+        companyPhone: agency.companyPhone,
+        whiteLabel: agency.whiteLabel,
+        address: agency.address,
+        city: agency.city,
+        zipCode: agency.zipCode,
+        state: agency.state,
+        country: agency.country,
+        goal: agency.goal,
+        createdAt: new Date(), // Explicitly set createdAt
+        updatedAt: new Date(), // Explicitly set updatedAt
         users: {
           connect: { email: agency.companyEmail },
         },
-        ...agency,
-        SidebarOption: {
+        sidebarOptions: {
           create: [
             {
+              id: v4(),
               name: "Dashboard",
               icon: "category",
               link: `/agency/${agency.id}`,
+              updatedAt: new Date(),
             },
             {
+              id: v4(),
               name: "Launchpad",
               icon: "clipboardIcon",
               link: `/agency/${agency.id}/launchpad`,
+              updatedAt: new Date(),
             },
             {
+              id: v4(),
               name: "Billing",
               icon: "payment",
               link: `/agency/${agency.id}/billing`,
+              updatedAt: new Date(),
             },
             {
+              id: v4(),
               name: "Settings",
               icon: "settings",
               link: `/agency/${agency.id}/settings`,
+              updatedAt: new Date(),
             },
             {
+              id: v4(),
               name: "Sub Accounts",
               icon: "person",
               link: `/agency/${agency.id}/all-subaccounts`,
+              updatedAt: new Date(),
             },
             {
+              id: v4(),
               name: "Team",
               icon: "shield",
               link: `/agency/${agency.id}/team`,
+              updatedAt: new Date(),
             },
           ],
         },
@@ -309,7 +519,8 @@ export const upsertAgency = async (agency: Agency, price?: Plan) => {
     });
     return agencyDetails;
   } catch (error) {
-    console.log(error);
+    console.log("Error in upsertAgency:", error);
+    throw error;
   }
 };
 
@@ -317,7 +528,7 @@ export const getNotificationAndUser = async (agencyId: string) => {
   try {
     const response = await db.notification.findMany({
       where: { agencyId },
-      include: { User: true },
+      include: { user: true },
       orderBy: { createdAt: "desc" },
     });
 
@@ -327,11 +538,11 @@ export const getNotificationAndUser = async (agencyId: string) => {
   }
 };
 
-export const upsertSubAccount = async (subAccount: SubAccount) => {
+export const upsertSubAccount = async (subAccount: subaccount) => {
   if (!subAccount.companyEmail) return null;
 
   const agencyOwner = await db.user.findFirst({
-    where: { Agency: { id: subAccount.agencyId }, role: "AGENCY_OWNER" },
+    where: { agency: { id: subAccount.agencyId }, role: "AGENCY_OWNER" },
   });
 
   if (!agencyOwner)
@@ -339,16 +550,17 @@ export const upsertSubAccount = async (subAccount: SubAccount) => {
 
   const permissionId = v4();
 
-  const response = await db.subAccount.upsert({
+  const response = await db.subaccount.upsert({
     where: { id: subAccount.id },
     update: subAccount,
     create: {
       ...subAccount,
       Permissions: {
         create: {
+          id: permissionId,
           access: true,
           email: agencyOwner.email,
-          id: permissionId,
+          subAccountId: subAccount.id,
         },
         connect: {
           subAccountId: subAccount.id,
@@ -411,13 +623,13 @@ export const upsertSubAccount = async (subAccount: SubAccount) => {
 export const getUserPermissions = async (userId: string) => {
   const response = await db.user.findUnique({
     where: { id: userId },
-    select: { Permissions: { include: { SubAccount: true } } },
+    include: { Permissions: { include: { SubAccount: true } } },
   });
 
   return response;
 };
 
-export const updateUser = async (user: Partial<User>) => {
+export const updateUser = async (user: Partial<user>) => {
   const response = await db.user.update({
     where: {
       email: user.email,
@@ -443,6 +655,7 @@ export const changeUserPermissions = async (
       where: { id: permissionId },
       update: { access: permission },
       create: {
+        id: v4(),
         access: permission,
         email: userEmail,
         subAccountId: subAccountId,
@@ -456,7 +669,7 @@ export const changeUserPermissions = async (
 
 export const getSubaccountDetails = async (subAccountId: string) => {
   try {
-    const response = await db.subAccount.findFirst({
+    const response = await db.subaccount.findFirst({
       where: { id: subAccountId },
     });
 
@@ -468,7 +681,7 @@ export const getSubaccountDetails = async (subAccountId: string) => {
 
 export const deleteSubAccount = async (subAccountId: string) => {
   try {
-    const response = await db.subAccount.delete({
+    const response = await db.subaccount.delete({
       where: { id: subAccountId },
     });
 
@@ -500,7 +713,7 @@ export const getUser = async (id: string) => {
 };
 
 export const sendInvitation = async (
-  role: Role,
+  role: invitation_role,
   email: string,
   agencyId: string
 ) => {
@@ -631,7 +844,7 @@ export const deletePipeline = async (pipelineId: string) => {
   return response;
 };
 
-export const updateLanesOrder = async (lanes: Lane[]) => {
+export const updateLanesOrder = async (lanes: lane[]) => {
   try {
     const updateTrans = lanes.map((lane) =>
       db.lane.update({
@@ -647,7 +860,7 @@ export const updateLanesOrder = async (lanes: Lane[]) => {
   }
 };
 
-export const updateTicketsOrder = async (tickets: Ticket[]) => {
+export const updateTicketsOrder = async (tickets: ticket[]) => {
   try {
     const updateTrans = tickets.map((ticket) =>
       db.ticket.update({
@@ -666,7 +879,7 @@ export const updateTicketsOrder = async (tickets: Ticket[]) => {
   }
 };
 
-export const upsertLane = async (lane: Prisma.LaneUncheckedCreateInput) => {
+export const upsertLane = async (lane: Prisma.laneUncheckedCreateInput) => {
   let order: number;
 
   if (!lane.order) {
@@ -716,7 +929,7 @@ export const getTicketsWithTags = async (pipelineId: string) => {
 export const getSubAccountTeamMembers = async (subAccountId: string) => {
   const subAccountUserWithAccess = await db.user.findMany({
     where: {
-      Agency: {
+      agency: {
         SubAccount: {
           some: {
             id: subAccountId,
@@ -749,8 +962,8 @@ export const searchContacts = async (searchTerms: string) => {
 };
 
 export const upsertTicket = async (
-  ticket: Prisma.TicketUncheckedCreateInput,
-  tags: Tag[]
+  ticket: Prisma.ticketUncheckedCreateInput,
+  tags: tag[]
 ) => {
   let order: number;
 
@@ -810,16 +1023,16 @@ export const deleteTag = async (tagId: string) => {
 };
 
 export const getTagsForSubaccount = async (subaccountId: string) => {
-  const response = await db.subAccount.findUnique({
+  const response = await db.subaccount.findUnique({
     where: { id: subaccountId },
-    select: { Tags: true },
+    include: { Tags: true },
   });
   return response;
 };
 
 export const upsertTag = async (
   subaccountId: string,
-  tag: Prisma.TagUncheckedCreateInput
+  tag: Prisma.tagUncheckedCreateInput
 ) => {
   const response = await db.tag.upsert({
     where: { id: tag.id || v4(), subAccountId: subaccountId },
@@ -831,7 +1044,7 @@ export const upsertTag = async (
 };
 
 export const upsertContact = async (
-  contact: Prisma.ContactUncheckedCreateInput
+  contact: Prisma.contactUncheckedCreateInput
 ) => {
   const response = await db.contact.upsert({
     where: { id: contact.id || v4() },
@@ -883,7 +1096,7 @@ export const upsertFunnelPage = async (
   funnelId: string
 ) => {
   if (!subaccountId || !funnelId) return;
-  const response = await db.funnelPage.upsert({
+  const response = await db.funnelpage.upsert({
     where: { id: funnelPage.id || "" },
     update: { ...funnelPage },
     create: {
@@ -908,13 +1121,13 @@ export const upsertFunnelPage = async (
 };
 
 export const deleteFunnelePage = async (funnelPageId: string) => {
-  const response = await db.funnelPage.delete({ where: { id: funnelPageId } });
+  const response = await db.funnelpage.delete({ where: { id: funnelPageId } });
 
   return response;
 };
 
 export const getFunnelPageDetails = async (funnelPageId: string) => {
-  const response = await db.funnelPage.findUnique({
+  const response = await db.funnelpage.findUnique({
     where: {
       id: funnelPageId,
     },
